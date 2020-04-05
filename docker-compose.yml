@@ -1,0 +1,43 @@
+version: '3'
+services: 
+    backend:
+        container_name: backendcontainer
+        # Build the image based on our Dockerfile
+        build:  
+            context: ./node
+        env_file: 
+            - .env
+        ports:
+            - "3000:3000"
+        depends_on: 
+            - db  
+        volumes: 
+            - ./pgdata:/var/lib/postgresql/data  
+    db:
+        container_name: dbcontainer
+        image: postgres:alpine
+        ports:
+            - ${DB_PORT}:${DB_PORT}  
+        # Create db and user
+        environment: 
+            - POSTGRES_DB=${DB_NAME}
+            - POSTGRES_USER=${DB_USER} 
+            - POSTGRES_PASSWORD=${DB_PASSWORD}ß
+        # Initiate db with a table and data
+        volumes:
+            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql 
+    frontend:
+        container_name: frontendcontainer
+        image: nginx:stable-alpine
+        ports: 
+            - "80:80"
+        depends_on: 
+            - db
+            - backend 
+        volumes: 
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf            
+      
+  
+   
+
+
